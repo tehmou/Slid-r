@@ -12,5 +12,6 @@ Usage:
 
 Tips & Tricks:
 - slides are defined as rectangles of name slide1, slide2, etc. located anywhere in the SVG
+- you must have one "root" group that contains everything you want to be shown
 - outline all of your texts (browsers don't handle real text well)
 - if the height of a slide rect is larger than the width, it will be considered rotated 90 degrees CCW
