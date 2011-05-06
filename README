@@ -1,0 +1,14 @@
+Create only one SVG image to be your presentation!
+
+
+Usage:
+- download the latest package of Slid?r
+- modify presentation.svg or replace it with your own
+- open index.html in FireFox4, Chrome or Safari (needs SVG support)
+- use the left and right arrow keys to navigate through slides
+
+
+Tips & Tricks:
+- slides are defined as rectangles of name slide1, slide2, etc. located anywhere in the SVG
+- outline all of your texts (browsers don't handle real text well)
+- if the height of a slide rect is larger than the width, it will be considered rotated 90 degrees CCW
