@@ -30,7 +30,7 @@
     <script type="text/javascript" src="js/jquery.svganim.js"></script>
 	<script type="text/javascript">
 
-        var onKeyDown;
+        var onClick, onKeyDown;
         
         $(function () {
             var hideFrames = true,
@@ -131,6 +131,10 @@
                     }
                 };
 
+                onClick = function (event) {
+                    showNextSlide();
+                };
+
                 onKeyDown = function (event) {
                     if (event.keyCode === 39) {
                         showNextSlide();
@@ -142,7 +146,7 @@
 
 	</script>
 </head>
-<body onkeydown="onKeyDown(event)">
+<body onclick="onClick(event)" onkeydown="onKeyDown(event)">
 <div id="mySvg"></div>
 </body>
 </html>
