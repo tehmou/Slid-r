@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Ribs.js Intro</title>
+
+    <style type="text/css">
+        @import "js/jquery.svg.css";
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #eee;
+        }
+
+        #mySvg {
+            margin: auto auto;
+            height: 600px;
+            width: 800px;
+            border: 1px solid black;
+            background: #ffffff;
+        }
+
+    </style>
+    
+	<script type="text/javascript" src="js/jquery-1.4.2.js"></script>
+    <script type="text/javascript" src="js/jquery.svg.js"></script>
+    <script type="text/javascript" src="js/jquery.svgdom.js"></script>
+    <script type="text/javascript" src="js/jquery.svganim.js"></script>
+	<script type="text/javascript">
+
+        var onKeyDown;
+        
+        $(function () {
+            var hideFrames = true,
+                svgFilename = "presentation.svg",
+                mainGroup, slides = [],
+                loadDone = function (svg, error) {
+                    if (error) {
+                        alert("File \"" + svgFilename + "\" not found.");
+                        return;
+                    }
+                        
+                    $("#mySvg")
+                            .css("width", svg._width())
+                            .css("height", svg._height());
+
+                    slides = [];
+                    $("rect", svg.root()).each(function (index, value) {
+                        var $value = $(value),
+                            slideMatch = $value.attr("id").match(/^slide([0-9]*)(.*)/);
+                        if (slideMatch) {
+                            var slideIndex = parseInt(slideMatch[1]),
+                                slideOptions = slideMatch[2] || "",
+                                slide = {
+                                    x: parseFloat($value.attr("x")), y: parseFloat($value.attr("y")),
+                                    width: parseFloat($value.attr("width")), height: parseFloat($value.attr("height")),
+                                    sideways: parseFloat($value.attr("height")) > parseFloat($value.attr("width"))
+                                };
+                            if (hideFrames) {
+                                $value.remove();
+                            }
+                            slides[slideIndex-1] = slide;
+                        }
+                    });
+
+                    for (var i = 1; i < slides.length; i++) {
+                        if (slides[i - 1].sideways && slides[i].sideways) {
+                            alert("Does not currently support multiple sideways slides after each other (" + (i - 1) + " and " + i + ")");
+                        }
+                    }
+
+                    svg.root().setAttribute("viewBox", "0 0 " + svg._width() + " " + svg._height());
+                    mainGroup = $("g:first", svg.root());
+                    mainGroup.attr("transform", calculateSlideTransformation(slides[0]));
+                },
+                svg = $('#mySvg').svg({
+                    loadURL: svgFilename,
+                    onLoad: loadDone,
+                    settings: {addTo: true, changeSize: false}
+                }),
+                currentSlideIndex = 0,
+                calculateSlideTransformation = function (slide) {
+                    var canvasWidth = parseFloat($("#mySvg").width()),
+                        canvasHeight = parseFloat($("#mySvg").height()),
+
+                        scaleX = (canvasWidth / (slide.sideways ? slide.height : slide.width)),
+                        scaleY = (canvasHeight / (slide.sideways ? slide.width : slide.height)),
+                        scaleString = "scale(" + scaleX + " " + scaleY + ")",
+
+                        rotation = slide.sideways ? Math.PI / 2 : 0,
+                        rotateString = "rotate(" + ((rotation / Math.PI) * 180) + " 0 0)",
+
+                        translateX, translateY, translateString;
+
+                    translateX = 0;
+                    translateY = 0;
+                    if (slide.sideways) {
+                        translateX += slide.y + canvasWidth/scaleX;
+                        translateY += -slide.x;
+                    } else {
+                        translateX += -slide.x;
+                        translateY += -slide.y;
+                    }
+
+                    translateString = "translate(" + translateX + " " + translateY + ")";
+
+                    return scaleString + " " + translateString + " " + rotateString;
+                },
+                animateWithTransformation = function () {
+                    var transformationString = calculateSlideTransformation(slides[currentSlideIndex]);
+                    mainGroup.animate({svgTransform: transformationString}, 1000);
+                },
+                showPrevSlide = function () {
+                    for (var i = currentSlideIndex - 1; i >= 0; i--) {
+                        if (slides[i]) {
+                            currentSlideIndex = i;
+                            animateWithTransformation();
+                            return;
+                        }
+                    }
+                },
+                showNextSlide = function () {
+                    for (var i = currentSlideIndex + 1; i < slides.length; i++) {
+                        if (slides[i]) {
+                            currentSlideIndex = i;
+                            animateWithTransformation();
+                            return;
+                        }
+                    }
+                };
+
+                onKeyDown = function (event) {
+                    if (event.keyCode === 39) {
+                        showNextSlide();
+                    } else if (event.keyCode === 37) {
+                        showPrevSlide();
+                    }
+                };
+        });
+
+	</script>
+</head>
+<body onkeydown="onKeyDown(event)">
+<div id="mySvg"></div>
+</body>
+</html>
