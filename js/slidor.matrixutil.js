@@ -28,22 +28,17 @@ Slidor.matrixUtil = {};
             slide = options.slide,
             canvasWidth = parseFloat($el.width()),
             canvasHeight = parseFloat($el.height()),
-            transformations = {};
+            t = {};
 
-        transformations.scaleX = (canvasWidth / (slide.sideways ? slide.height : slide.width));
-        transformations.scaleY = (canvasHeight / (slide.sideways ? slide.width : slide.height));
+        //t.scaleX = canvasWidth / slide.width;
+        //t.scaleY = canvasHeight / slide.height;
 
-        transformations.rotation = slide.sideways ? Math.PI / 2 : 0;
+        t.rotation = 0;
 
-        if (slide.sideways) {
-            transformations.translateX = slide.y + canvasWidth/transformations.scaleX;
-            transformations.translateY = -slide.x;
-        } else {
-            transformations.translateX = -slide.x;
-            transformations.translateY = -slide.y;
-        }
-        
-        return transformations;
+        t.translateX = -slide.x;
+        t.translateY = -slide.y;
+
+        return t;
     };
 
 }());
