@@ -6,17 +6,13 @@ Slidor.matrixUtil = {};
         var $el = $(options.el),
             m = options.matrix,
             matrixString = "matrix("+m.a1+", "+m.a2+", "+m.b1+", "+m.b2+", "+m.c1+", "+m.c2+")",
-            matrixStringFF = "matrix("+m.a1+", "+m.a2+", "+m.b1+", "+m.b2+", "+m.c1+"px, "+m.c2+"px)",
-            originString = "0px 0px";//m.c1+"px "+m.c2+"px";
+            matrixStringFF = "matrix("+m.a1+", "+m.a2+", "+m.b1+", "+m.b2+", "+m.c1+"px, "+m.c2+"px)";
         $el
                 .css("-moz-transform", matrixStringFF)
                 .css("-webkit-transform", matrixString)
                 .css("-o-transform", matrixString)
                 .css("transform", matrixString)
-                .css("-moz-transform-origin", originString)
-                .css("-webkit-transform-origin", originString)
-                .css("-o-transform-origin", originString)
-                .css("transform-origin", originString);
+                .css("transform-origin", "0px 0px");
     };
 
     Slidor.matrixUtil.applyTransformations = function (options) {
@@ -32,20 +28,15 @@ Slidor.matrixUtil = {};
             slide = options.slide,
             canvasWidth = parseFloat($el.width()),
             canvasHeight = parseFloat($el.height()),
-            t = {},
-            scaleX = canvasWidth / slide.width,
-            scaleY = canvasHeight / slide.height,
-            scale = Math.min(scaleX, scaleY);
+            t = {};
 
-        t.scaleX = scale;
-        t.scaleY = scale;
+        //t.scaleX = canvasWidth / slide.width;
+        //t.scaleY = canvasHeight / slide.height;
 
         t.rotation = 0;
 
-        var offsetX = (canvasWidth - slide.width*scale)/2;
-        console.log(offsetX);
-        t.translateX = -slide.x * scale + offsetX;
-        t.translateY = -slide.y * scaleY;
+        t.translateX = -slide.x;
+        t.translateY = -slide.y;
 
         return t;
     };
