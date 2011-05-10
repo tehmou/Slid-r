@@ -12,17 +12,20 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            position: absolute;
+            position: fixed;
             overflow: hidden;
             background: #ffffff;
         }
-        
+
         #mySvg {
-            width: 100%;
-            height: 100%;
-            -webkit-transition: all 3s ease-in;
-            -moz-transition: all 3s ease-in;
-            -o-transition: all 3s ease-in;
+            
+        }
+        
+        .transition-3s {
+            -webkit-transition: all 1s ease-in;
+            -moz-transition: all 1s ease-in;
+            -o-transition: all 1s ease-in;
+            transition: all 1s ease-in;
         }
 
     </style>
@@ -38,12 +41,12 @@
         var onClick, onKeyDown;
 
         $(function () {
-            var hideFrames = true,
+            var hideFrames = false,
                 svgFilename = "presentation_large.svg",
                 slides = [],
                 currentSlideIndex = -1,
                 animateWithTransformation = function () {
-                    var t = Slidor.matrixUtil.calculateTransformations({ container: document.body, slide: slides[0] });
+                    var t = Slidor.matrixUtil.calculateTransformations({ container: document.body, slide: slides[currentSlideIndex] });
                     Slidor.matrixUtil.applyTransformations({ el: $("#mySvg"), transformations: t });
                 },
                 showPrevSlide = function () {
@@ -84,7 +87,7 @@
                 success: function (s) {
                     slides = s;
                     showNextSlide();
-                    //Slidor.matrixUtil.applyTransformations({ el: "#mySvg", transformations: { translateX: -100, translateY: -1400, scaleX: 6, scaleY: 6} });
+                    setTimeout(function () { $("#mySvg").toggleClass("transition-3s", true); });
                 },
                 error: function () {
                     alert("Error loading svg file " + svgFilename);
@@ -94,7 +97,7 @@
 
 	</script>
 </head>
-<body onkeydown="onKeyDown(event)" onclick="onClick(event)">
-<div id="mySvg"></div>
+<body onkeydown="onKeyDown(event)">
+<div id="mySvg" onclick="onClick(event)"></div>
 </body>
 </html>
