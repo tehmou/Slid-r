@@ -19,17 +19,11 @@ Slidor.matrixUtil = {};
                 .css("transform-origin", transformOriginString);
     };
 
-    Slidor.matrixUtil.applyTransformations = function (options) {
-        var el = options.el,
-            t = options.transformations,
-            matrix = { a1:t.scaleX||1,a2:0,b1:0,b2:t.scaleY||1,c1:t.translateX||0,c2:t.translateY||0 };
-        Slidor.matrixUtil.applyTransformationMatrix({ el: el, matrix: matrix });
-    };
-
-    Slidor.matrixUtil.calculateTransformations = function (options) {
+    Slidor.matrixUtil.calculateTransformationMatrix = function (options) {
         options = options || {};
         var $el = $(options.container),
             slide = options.slide,
+            origin = options.origin || {x:0, y:0},
             canvasWidth = parseFloat($el.width()),
             canvasHeight = parseFloat($el.height()),
             scaleX = canvasWidth / slide.width,
@@ -42,10 +36,10 @@ Slidor.matrixUtil = {};
 
         t.rotation = 0;
 
-        t.translateX = -slide.x*scale + (canvasWidth - scale*slide.width) / 2;
-        t.translateY = -slide.y*scale + (canvasHeight - scale*slide.height) / 2;
+        t.translateX = -(slide.x-origin.x)*scale + (canvasWidth - scale*slide.width) / 2;
+        t.translateY = -(slide.y-origin.y)*scale + (canvasHeight - scale*slide.height) / 2;
 
-        return t;
+        return { a1:t.scaleX||1,a2:0,b1:0,b2:t.scaleY||1,c1:t.translateX||0,c2:t.translateY||0 };
     };
 
 }());

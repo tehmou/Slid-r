@@ -5,32 +5,36 @@ var Slidor = function (options) {
         svgFilename = options.svgFilename,
         mode = options.mode || "svg",
         transitionDuration = options.transformDuration || 1000,
-        el = $(options.el), mainGroup, svg,
+        el = $(options.el), mainGroup, svg, viewBox, origin = {x:0, y:0},
 
-        initSvgTransformation = function (options) {
-            el.css("width", svg._width());
-            el.css("height", svg._height());
-            svg.root().setAttribute("viewBox", "0 0 " + svg._width() + " " + svg._height());
+        initSvgTransformation = function () {
+            svg.root().setAttribute("viewBox", "0 0 " + el.width() + " " + el.height());
             mainGroup = $("g:first", svg.root());
         },
-        initCssTransformation = function (options) {
-            var viewBox = Slidor.svgUtil.readViewBox(svg);
+        initCssTransformation = function () {
+            viewBox = Slidor.svgUtil.readViewBox(svg);
             el.css("width", viewBox.width);
             el.css("height", viewBox.height);
             svg.root().setAttribute("width", viewBox.width);
             svg.root().setAttribute("height", viewBox.height);
+            origin.x = viewBox.x;
+            origin.y = viewBox.y;
         },
 
         slides = [],
         currentSlideIndex = -1,
         animateWithTransformation = function () {
-            var t = Slidor.matrixUtil.calculateTransformations({ container: document.body, slide: slides[currentSlideIndex] });
+            var m = Slidor.matrixUtil.calculateTransformationMatrix({
+                container: document.body,
+                slide: slides[currentSlideIndex],
+                origin: origin
+            });
             if (mode === "css") {
-                Slidor.matrixUtil.applyTransformations({ el: el, transformations: t });
+                Slidor.matrixUtil.applyTransformationMatrix({ el: el, matrix: m });
             } else {
                 Slidor.svgUtil.animateWithTransformation({
                     group: mainGroup,
-                    transformations: t,
+                    matrix: m,
                     duration: transitionDuration
                 });
             }
@@ -62,24 +66,21 @@ var Slidor = function (options) {
         hideFrames: hideFrames,
         success: function (loadedSvg) {
             svg = loadedSvg;
-            slides = Slidor.svgUtil.readSlides({ svg: svg, hideFrames: hideFrames });
             if (mode === "css") {
                 initCssTransformation();
-                slidor.showNextSlide();
-
-                if (transitionDuration) {
-                    setTimeout(function () {
-                        var transitionString = "all "+transitionDuration+"ms ease-in";
-                        el
-                                .css("-webkit-transition", transitionString)
-                                .css("-moz-transition", transitionString)
-                                .css("-o-transition", transitionString)
-                                .css("transition", transitionString);
-                    }, 300);
-                }
             } else {
                 initSvgTransformation();
-                slidor.showNextSlide();
+            }
+            slides = Slidor.svgUtil.readSlides({ svg: svg, hideFrames: hideFrames });
+            slidor.showNextSlide();
+
+            if (mode === "css" && transitionDuration) {
+                var transitionString = "all "+transitionDuration+"ms ease-in";
+                el
+                        .css("-webkit-transition", transitionString)
+                        .css("-moz-transition", transitionString)
+                        .css("-o-transition", transitionString)
+                        .css("transition", transitionString);
             }
         },
         error: function () {

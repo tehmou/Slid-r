@@ -18,7 +18,8 @@
         }
 
         #mySvg {
-            
+            width: 100%;
+            height: 100%;
         }
 
     </style>
@@ -26,6 +27,7 @@
 	<script type="text/javascript" src="js/jquery-1.4.2.js"></script>
     <script type="text/javascript" src="js/jquery.svg.js"></script>
     <script type="text/javascript" src="js/jquery.svgdom.js"></script>
+    <script type="text/javascript" src="js/jquery.svganim.js"></script>
     <script type="text/javascript" src="js/slidor.js"></script>
     <script type="text/javascript" src="js/slidor.matrixutil.js"></script>
     <script type="text/javascript" src="js/slidor.svgutil.js"></script>
@@ -38,7 +40,7 @@
             var slidor = new Slidor({
                 el: "#mySvg",
                 svgFilename: "presentation_large.svg",
-                hideFrames: false,
+                hideFrames: true,
                 mode: "css",
                 transformDuration: 1000
             });

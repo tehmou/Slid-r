@@ -37,8 +37,7 @@ Slidor.svgUtil = {};
 
     Slidor.svgUtil.readSlides = function (options) {
         var svg = options.svg,
-            hideFrames = options.hideFrames || true,
-            viewBox = Slidor.svgUtil.readViewBox(svg),
+            hideFrames = options.hideFrames,
             slides = [];
 
         $("rect", svg.root()).each(function (index, value) {
@@ -48,10 +47,11 @@ Slidor.svgUtil = {};
                 var slideIndex = parseInt(slideMatch[1]),
                     slideOptions = slideMatch[2] || "",
                     slide = {
-                        x: parseFloat($value.attr("x")) - viewBox.x,
-                        y: parseFloat($value.attr("y")) - viewBox.y,
+                        x: parseFloat($value.attr("x")),
+                        y: parseFloat($value.attr("y")),
                         width: parseFloat($value.attr("width")),
-                        height: parseFloat($value.attr("height"))
+                        height: parseFloat($value.attr("height")),
+                        options: slideOptions
                     };
                 console.log(slide.x + ", " + slide.y);
                 if (hideFrames !== false) {
@@ -61,21 +61,18 @@ Slidor.svgUtil = {};
             }
         });
 
-        for (var i = 1; i < slides.length; i++) {
-            if (slides[i - 1].sideways && slides[i].sideways) {
-                alert("Does not currently support multiple sideways slides after each other (" + (i - 1) + " and " + i + ")");
-            }
-        }
-
         return slides;
     };
 
     Slidor.svgUtil.animateWithTransformation = function (options) {
         var group = options.group,
             duration = options.duration,
-            t = options.transformations,
-            transformationString = "matrix("+t.a1+" "+t.a2+" "+t.b1+" "+t.b2+" "+t.c1+" "+t.c2+")";
-            group.animate({ svgTransform: transformationString }, duration);
+            m = options.matrix,
+            transformationString = "matrix("+m.a1+" "+m.a2+" "+m.b1+" "+m.b2+" "+m.c1+" "+m.c2+")";
+
+        console.log(transformationString);
+        console.log(group);
+        group.animate({ svgTransform: transformationString }, duration);
     };
 
 }());
