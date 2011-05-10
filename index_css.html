@@ -20,13 +20,6 @@
         #mySvg {
             
         }
-        
-        .transition-3s {
-            -webkit-transition: all 1s ease-in;
-            -moz-transition: all 1s ease-in;
-            -o-transition: all 1s ease-in;
-            transition: all 1s ease-in;
-        }
 
     </style>
     
@@ -41,58 +34,28 @@
         var onClick, onKeyDown;
 
         $(function () {
-            var hideFrames = false,
-                svgFilename = "presentation_large.svg",
-                slides = [],
-                currentSlideIndex = -1,
-                animateWithTransformation = function () {
-                    var t = Slidor.matrixUtil.calculateTransformations({ container: document.body, slide: slides[currentSlideIndex] });
-                    Slidor.matrixUtil.applyTransformations({ el: $("#mySvg"), transformations: t });
-                },
-                showPrevSlide = function () {
-                    for (var i = currentSlideIndex - 1; i >= 0; i--) {
-                        if (slides[i]) {
-                            currentSlideIndex = i;
-                            animateWithTransformation();
-                            return;
-                        }
-                    }
-                },
-                showNextSlide = function () {
-                    for (var i = currentSlideIndex + 1; i < slides.length; i++) {
-                        if (slides[i]) {
-                            currentSlideIndex = i;
-                            animateWithTransformation();
-                            return;
-                        }
-                    }
-                };
+
+            var slidor = new Slidor({
+                el: "#mySvg",
+                svgFilename: "presentation_large.svg",
+                hideFrames: false,
+                mode: "css",
+                transformDuration: 1000
+            });
 
             onClick = function (event) {
-                showNextSlide();
+                slidor.showNextSlide();
             };
 
             onKeyDown = function (event) {
                 if (event.keyCode === 39) {
-                    showNextSlide();
+                    slidor.showNextSlide();
                 } else if (event.keyCode === 37) {
-                    showPrevSlide();
+                    slidor.showPrevSlide();
                 }
             };
 
-            Slidor.svgUtil.loadSvg({
-                svgFilename: svgFilename,
-                hideFrames: hideFrames,
-                el: $("#mySvg"),
-                success: function (s) {
-                    slides = s;
-                    showNextSlide();
-                    setTimeout(function () { $("#mySvg").toggleClass("transition-3s", true); });
-                },
-                error: function () {
-                    alert("Error loading svg file " + svgFilename);
-                }
-            })
+
         });
 
 	</script>
