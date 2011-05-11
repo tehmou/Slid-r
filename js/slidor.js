@@ -4,6 +4,8 @@ var Slidor = function (options) {
         hideFrames = options.hideFrames,
         svgFilename = options.svgFilename,
         mode = options.mode || "svg",
+        autoStart = options.autoStart || false,
+        autoRewind = options.autoRewind || false,
         transitionDuration = options.transformDuration || 1000,
         el = $(options.el), mainGroup, svg, viewBox, origin = {x:0, y:0},
 
@@ -58,6 +60,10 @@ var Slidor = function (options) {
                 return;
             }
         }
+        if (autoRewind && currentSlideIndex === slides.length - 1) {
+            currentSlideIndex = -1;
+            this.showNextSlide();
+        }
     };
 
     Slidor.svgUtil.loadSvg({
@@ -72,7 +78,9 @@ var Slidor = function (options) {
                 initSvgTransformation();
             }
             slides = Slidor.svgUtil.readSlides({ svg: svg, hideFrames: hideFrames });
-            slidor.showNextSlide();
+            if (autoStart) {
+                slidor.showNextSlide();
+            }
 
             if (mode === "css" && transitionDuration) {
                 var transitionString = "all "+transitionDuration+"ms ease-in";
