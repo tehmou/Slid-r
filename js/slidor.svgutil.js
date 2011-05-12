@@ -36,7 +36,8 @@ Slidor.svgUtil = {};
     };
 
     var slideMatcher = /^slide([0-9]*)(.*)/,
-        gotoMatcher = /^goto([a-zA-Z0-9]*)/;
+        gotoMatcher = /^goto([a-zA-Z0-9]*)/,
+        slideGroupMatcher = /^slidegroup([a-zA-Z0-9]*)/;
 
     Slidor.svgUtil.readSlides = function (options) {
         var svg = options.svg,
@@ -78,9 +79,9 @@ Slidor.svgUtil = {};
 
         $("g", svg.root()).each(function (index, value) {
             var $value = $(value),
-                slideGroupMatch = $value.attr("id").match(/slidegroup([0-9.]*)/);
+                slideGroupMatch = $value.attr("id").match(slideGroupMatcher);
             if (slideGroupMatch) {
-                var slideGroupId = slideGroupMatch[1];
+                var slideGroupId = "slidegroup" + slideGroupMatch[1];
                 slides.slideGroups[slideGroupId] = [];
                 $value.children().each(function (index, value) {
                     var slide = Slidor.svgUtil.createSlide($(value), {});
