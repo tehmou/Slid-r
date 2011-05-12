@@ -46,14 +46,7 @@ Slidor.svgUtil = {};
             if (slideMatch) {
                 var slideIndex = parseInt(slideMatch[1]),
                     slideOptions = slideMatch[2] || "",
-                    slide = {
-                        x: parseFloat($value.attr("x")),
-                        y: parseFloat($value.attr("y")),
-                        width: parseFloat($value.attr("width")),
-                        height: parseFloat($value.attr("height")),
-                        options: slideOptions
-                    };
-                console.log(slide.x + ", " + slide.y);
+                    slide = Slidor.svgUtil.createSlide($value, slideOptions);
                 if (hideFrames !== false) {
                     $value.remove();
                 }
@@ -61,7 +54,31 @@ Slidor.svgUtil = {};
             }
         });
 
+        $("g", svg.root()).each(function (index, value) {
+            var $value = $(value),
+                slideGroupMatch = $value.attr("id").match(/slidegroup([0-9.]*)/);
+            console.log($value.attr("id"));
+            if (slideGroupMatch) {
+                console.log("Found slide group " + slideGroupMatch[1]);
+                $value.children().each(function (index, value) {
+                    var slide = Slidor.svgUtil.createSlide(value, {});
+                    console.log("Created group slide");
+                    slides.push(slide);
+                });
+            }
+        });
+
         return slides;
+    };
+
+    Slidor.svgUtil.createSlide = function ($slideEl, options) {
+        return {
+            x: parseFloat($slideEl.attr("x")),
+            y: parseFloat($slideEl.attr("y")),
+            width: parseFloat($slideEl.attr("width")),
+            height: parseFloat($slideEl.attr("height")),
+            options: options
+        };
     };
 
     Slidor.svgUtil.animateWithTransformation = function (options) {

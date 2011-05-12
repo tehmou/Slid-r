@@ -53,6 +53,9 @@ var Slidor = function (options) {
     };
 
     this.showNextSlide = function () {
+        if (slides.length === 0) {
+            return;
+        }
         for (var i = currentSlideIndex + 1; i < slides.length; i++) {
             if (slides[i]) {
                 currentSlideIndex = i;
