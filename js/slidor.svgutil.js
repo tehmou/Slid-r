@@ -60,7 +60,6 @@ Slidor.svgUtil = {};
             if (slideGroupMatch) {
                 $value.children().each(function (index, value) {
                     var slide = Slidor.svgUtil.createSlide($(value), {});
-                    console.log(slide);
                     slides.push(slide);
                 });
             }
