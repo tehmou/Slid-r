@@ -29,6 +29,7 @@
     <script type="text/javascript" src="js/jquery.svganim.js"></script>
     <script type="text/javascript" src="js/slidor.js"></script>
     <script type="text/javascript" src="js/slidor.matrixutil.js"></script>
+    <script type="text/javascript" src="js/slidor.presentation.js"></script>
     <script type="text/javascript" src="js/slidor.svgutil.js"></script>
   	<script type="text/javascript">
 
@@ -36,25 +37,25 @@
 
         $(function () {
 
-            var slidor = new Slidor({
+            var presentation = Slidor.presentation.create({
                 el: "#mySvg",
                 svgFilename: "presentation_large_futu.svg",
                 hideFrames: true,
                 mode: "svg",
-                transformDuration: 1000,
+                transformDuration: 750,
                 autoRewind: true,
                 autoStart: true
             });
 
             onClick = function (event) {
-                slidor.showNextSlide();
+                presentation.showNextSlide();
             };
 
             onKeyDown = function (event) {
                 if (event.keyCode === 39) {
-                    slidor.showNextSlide();
+                    presentation.showNextSlide();
                 } else if (event.keyCode === 37) {
-                    slidor.showPrevSlide();
+                    presentation.showPrevSlide();
                 }
             };
 
@@ -64,6 +65,6 @@
 	</script>
 </head>
 <body onkeydown="onKeyDown(event)">
-<div id="mySvg" onclick="onClick(event)"></div>
+<div id="mySvg"></div>
 </body>
 </html>

@@ -35,14 +35,22 @@ Slidor.svgUtil = {};
         }
     };
 
+    var slideMatcher = /^slide([0-9]*)(.*)/,
+        gotoMatcher = /^goto([a-zA-Z0-9]*)/;
+
     Slidor.svgUtil.readSlides = function (options) {
         var svg = options.svg,
             hideFrames = options.hideFrames,
-            slides = [];
+            gotoCallback = options.gotoCallback,
+            slides = {
+                presentationRoot: [],
+                slideGroups: {}
+            };
 
         $("rect", svg.root()).each(function (index, value) {
             var $value = $(value),
-                slideMatch = $value.attr("id").match(/^slide([0-9]*)(.*)/);
+                slideMatch = $value.attr("id").match(slideMatcher);
+
             if (slideMatch) {
                 var slideIndex = parseInt(slideMatch[1]),
                     slideOptions = slideMatch[2] || "",
@@ -50,7 +58,21 @@ Slidor.svgUtil = {};
                 if (hideFrames !== false) {
                     $value.remove();
                 }
-                slides[slideIndex-1] = slide;
+                slides.presentationRoot[slideIndex-1] = slide;
+            }
+        });
+
+        $("rect, g", svg.root()).each(function (index, value) {
+            var $value = $(value), id = $value.attr("id"),
+                gotoMatch = id.match(gotoMatcher);
+
+            if (gotoMatch) {
+                $value.click(function () {
+                    var gotoTarget = gotoMatch[1];
+                    if (gotoCallback) {
+                        gotoCallback(gotoTarget);
+                    }
+                });
             }
         });
 
@@ -58,9 +80,12 @@ Slidor.svgUtil = {};
             var $value = $(value),
                 slideGroupMatch = $value.attr("id").match(/slidegroup([0-9.]*)/);
             if (slideGroupMatch) {
+                var slideGroupId = slideGroupMatch[1];
+                slides.slideGroups[slideGroupId] = [];
                 $value.children().each(function (index, value) {
                     var slide = Slidor.svgUtil.createSlide($(value), {});
-                    slides.push(slide);
+                    slides.slideGroups[slideGroupId].push(slide);
+                    slide.$el.toggle(false);
                 });
             }
         });
@@ -71,6 +96,7 @@ Slidor.svgUtil = {};
     Slidor.svgUtil.createSlide = function ($slideEl, options) {
         var slide = {}, transform, matrix;
 
+        slide.$el = $slideEl;
         slide.width = parseFloat($slideEl.attr("width"));
         slide.height = parseFloat($slideEl.attr("height"));
         slide.options = options;
