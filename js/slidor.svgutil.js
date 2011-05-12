@@ -57,12 +57,10 @@ Slidor.svgUtil = {};
         $("g", svg.root()).each(function (index, value) {
             var $value = $(value),
                 slideGroupMatch = $value.attr("id").match(/slidegroup([0-9.]*)/);
-            console.log($value.attr("id"));
             if (slideGroupMatch) {
-                console.log("Found slide group " + slideGroupMatch[1]);
                 $value.children().each(function (index, value) {
-                    var slide = Slidor.svgUtil.createSlide(value, {});
-                    console.log("Created group slide");
+                    var slide = Slidor.svgUtil.createSlide($(value), {});
+                    console.log(slide);
                     slides.push(slide);
                 });
             }
@@ -72,13 +70,27 @@ Slidor.svgUtil = {};
     };
 
     Slidor.svgUtil.createSlide = function ($slideEl, options) {
-        return {
-            x: parseFloat($slideEl.attr("x")),
-            y: parseFloat($slideEl.attr("y")),
-            width: parseFloat($slideEl.attr("width")),
-            height: parseFloat($slideEl.attr("height")),
-            options: options
-        };
+        var slide = {}, transform, matrix;
+
+        slide.width = parseFloat($slideEl.attr("width"));
+        slide.height = parseFloat($slideEl.attr("height"));
+        slide.options = options;
+
+        transform = $slideEl.attr("transform");
+        matrix = transform && transform.match(/matrix\(([-0-9.,]*)\)/);
+        if (matrix) {
+            var matrixString = matrix[1],
+                matrixArray = matrixString.split(",");
+            slide.x = matrixArray[4];
+            slide.y = matrixArray[5];
+            slide.width *= matrixArray[0];
+            slide.height *= matrixArray[3];
+        } else {
+            slide.x = parseFloat($slideEl.attr("x"));
+            slide.y = parseFloat($slideEl.attr("y"));
+        }
+
+        return slide;
     };
 
     Slidor.svgUtil.animateWithTransformation = function (options) {
@@ -87,8 +99,6 @@ Slidor.svgUtil = {};
             m = options.matrix,
             transformationString = "matrix("+m.a1+" "+m.a2+" "+m.b1+" "+m.b2+" "+m.c1+" "+m.c2+")";
 
-        console.log(transformationString);
-        console.log(group);
         group.animate({ svgTransform: transformationString }, duration);
     };
 
