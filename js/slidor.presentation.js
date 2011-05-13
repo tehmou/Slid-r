@@ -8,7 +8,10 @@ Slidor.presentation.createSlideStack = function (options) {
 
         currentIndex = -1,
 
-        show = function () {
+        show = function (index) {
+            if (typeof(index) !== "undefined") {
+                currentIndex = index;
+            }
             if (showCallback) {
                 showCallback(slides[currentIndex]);
             }
@@ -71,10 +74,35 @@ Slidor.presentation.create = function (options) {
             }
             return false;
         },
-        createSlideStack = function (slides) {
+
+
+        createNormalSlideStack = function (slides) {
             return Slidor.presentation.createSlideStack({
                 slides: slides,
                 showCallback: function (slide) {
+                    slidor.animateWithTransformation(slide);
+                },
+                previousOfFirstCallback: function () {
+                    popSlideStack();
+                },
+                endCallback: function () {
+                    if (!popSlideStack() && autoRewind) {
+                        slideStackStack[0].reset();
+                    }
+                },
+                previousOfFirstCallback: popSlideStack
+            });
+        },
+        createGroupSlideStack = function (slides) {
+            return Slidor.presentation.createSlideStack({
+                slides: slides,
+                showCallback: function (slide) {
+                    for (var key in slides) {
+                        if (slides[key] !== slide) {
+                            slides[key].$el.toggle(false);
+                        }
+                    }
+                    slide.$el.toggle(true);
                     console.log(slide);
                     slidor.animateWithTransformation(slide);
                 },
@@ -87,7 +115,7 @@ Slidor.presentation.create = function (options) {
                     }
                 },
                 previousOfFirstCallback: popSlideStack
-            })
+            });
         };
 
     slidor = new Slidor({
@@ -101,7 +129,7 @@ Slidor.presentation.create = function (options) {
                 hideFrames: hideFrames,
                 gotoCallback: presentation.gotoSlide
             });
-            slideStackStack = [createSlideStack(readSlides.presentationRoot)];
+            slideStackStack = [createNormalSlideStack(readSlides.presentationRoot)];
             if (autoStart) {
                 presentation.showNextSlide();
             }
@@ -117,7 +145,7 @@ Slidor.presentation.create = function (options) {
             alert("Cloud not find slide group " + target);
             return;
         }
-        slideStack = createSlideStack(newSlides);
+        slideStack = createGroupSlideStack(newSlides);
         slideStackStack.splice(0, 0, slideStack);
         presentation.showNextSlide();
     };
@@ -128,6 +156,11 @@ Slidor.presentation.create = function (options) {
 
     this.showNextSlide = function () {
         slideStackStack[0].next();
+    };
+
+    this.showMenu = function () {
+        slideStackStack = [slideStackStack[slideStackStack.length - 1]];
+        slideStackStack[0].show(readSlides.menuIndex);
     };
 
     this.reset = function () {

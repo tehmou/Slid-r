@@ -8,6 +8,7 @@
         @import "js/jquery.svg.css";
 
         body {
+            font-family: arial;
             margin: 0;
             padding: 0;
             width: 100%;
@@ -19,6 +20,37 @@
         #mySvg {
             width: 100%;
             height: 100%;
+        }
+
+        #next-button, #prev-button, #menu-button {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: white;
+            opacity: 0.5;
+        }
+
+        span {
+            position: absolute;
+            bottom: 5px;
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        #next-button {
+            bottom: 0;
+            right: 0;
+        }
+
+        #prev-button {
+            bottom: 0;
+            left: 0;
+        }
+
+        #menu-button {
+            top: 0;
+            left: 0;
         }
 
     </style>
@@ -43,7 +75,7 @@
                 hideFrames: true,
                 mode: "svg",
                 transformDuration: 750,
-                autoRewind: true,
+                autoRewind: false,
                 autoStart: true
             });
 
@@ -59,6 +91,10 @@
                 }
             };
 
+            $("#next-button").click(presentation.showNextSlide);
+            $("#prev-button").click(presentation.showPrevSlide);
+            $("#menu-button").click(presentation.showMenu);
+
 
         });
 
@@ -66,5 +102,8 @@
 </head>
 <body onkeydown="onKeyDown(event)">
 <div id="mySvg"></div>
+<div id="prev-button"><span>prev</span></div>
+<div id="menu-button"><span>menu</span></div>
+<div id="next-button"><span>next</span></div>
 </body>
 </html>

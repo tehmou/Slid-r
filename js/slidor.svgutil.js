@@ -60,6 +60,10 @@ Slidor.svgUtil = {};
                     $value.remove();
                 }
                 slides.presentationRoot[slideIndex-1] = slide;
+                if (slideOptions.indexOf("menu") !== -1) {
+                    slides.menuIndex = slideIndex-1;
+                    console.log("menu: " + slides.menuIndex);
+                }
             }
         });
 
