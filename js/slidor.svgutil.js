@@ -86,11 +86,14 @@ Slidor.svgUtil = {};
                 slideGroupMatch = $value.attr("id").match(slideGroupMatcher);
             if (slideGroupMatch) {
                 var slideGroupId = "slidegroup" + slideGroupMatch[1];
-                slides.slideGroups[slideGroupId] = [];
+                slides.slideGroups[slideGroupId] = {
+                    $el: $value,
+                    slides: []
+                };
                 $value.children().each(function (index, value) {
-                    var slide = Slidor.svgUtil.createSlide($(value), {});
-                    slides.slideGroups[slideGroupId].push(slide);
-                    slide.$el.toggle(false);
+                    var slide = Slidor.svgUtil.createSlide(value, {});
+                    slides.slideGroups[slideGroupId].slides.push(slide);
+                    slide.$el.detach();
                 });
             }
         });
@@ -98,15 +101,15 @@ Slidor.svgUtil = {};
         return slides;
     };
 
-    Slidor.svgUtil.createSlide = function ($slideEl, options) {
+    Slidor.svgUtil.createSlide = function (slideEl, options) {
         var slide = {}, transform, matrix;
 
-        slide.$el = $slideEl;
-        slide.width = parseFloat($slideEl.attr("width"));
-        slide.height = parseFloat($slideEl.attr("height"));
+        slide.$el = $(slideEl);
+        slide.width = parseFloat(slide.$el.attr("width"));
+        slide.height = parseFloat(slide.$el.attr("height"));
         slide.options = options;
 
-        transform = $slideEl.attr("transform");
+        transform = slide.$el.attr("transform");
         matrix = transform && transform.match(/matrix\(([-0-9.,]*)\)/);
         if (matrix) {
             var matrixString = matrix[1],
@@ -116,8 +119,8 @@ Slidor.svgUtil = {};
             slide.width *= matrixArray[0];
             slide.height *= matrixArray[3];
         } else {
-            slide.x = parseFloat($slideEl.attr("x"));
-            slide.y = parseFloat($slideEl.attr("y"));
+            slide.x = parseFloat(slide.$el.attr("x"));
+            slide.y = parseFloat(slide.$el.attr("y"));
         }
 
         return slide;

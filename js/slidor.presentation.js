@@ -1,9 +1,136 @@
 Slidor.presentation = {};
 
+Slidor.presentation.create = function (options) {
+    var hideFrames = options.hideFrames,
+
+        slidor,
+        presentation = this,
+        readSlides = [],
+        slideStackStack = Slidor.presentation.createSlideStackStack(),
+
+        createNormalSlideStack = function (slides) {
+            return Slidor.presentation.createSlideStack({
+                slides: slides,
+                showCallback: function (slide) {
+                    slidor.animateWithTransformation(slide);
+                }
+            });
+        },
+        createGroupSlideStack = function (slideGroup) {
+            return Slidor.presentation.createSlideStack({
+                slides: slideGroup.slides,
+                showCallback: function (slide) {
+                    for (var key in slideGroup.slides) {
+                        if (slideGroup.slides[key] !== slide && !slideGroup.slides[key].$el.is(":visible")) {
+                            slideGroup.slides[key].$el.fadeOut();
+                        }
+                    }
+                    slideGroup.$el.append(slide.$el);
+                    slide.$el.fadeIn();
+                    slidor.animateWithTransformation(slide);
+                },
+                endCallback: function () {
+                    slideStackStack.pop();
+                },
+                previousOfFirstCallback: function () {
+                    slideStackStack.pop();
+                },
+                hideCallback: function () {
+                    for (var key in slideGroup.slides) {
+                        if (slideGroup.slides[key].$el.is(":visible")) {
+                            slideGroup.slides[key].$el.detach();
+                        }
+                    }
+                }
+            });
+        };
+
+    slidor = new Slidor({
+        el: options.el,
+        svgFilename: options.svgFilename,
+        mode: options.mode,
+        transitionDuration: options.transformDuration,
+        success: function (loadedSvg) {
+            readSlides = Slidor.svgUtil.readSlides({
+                svg: loadedSvg,
+                hideFrames: hideFrames,
+                gotoCallback: presentation.gotoSlide
+            });
+            slideStackStack.push(createNormalSlideStack(readSlides.presentationRoot));
+        },
+        error: function () {
+            alert("Error loading svg file " + svgFilename);
+        }
+    });
+    
+    this.gotoSlide = function (target) {
+        var newSlides = readSlides.slideGroups[target];
+        if (!newSlides) {
+            alert("Cloud not find slide group " + target);
+            return;
+        }
+        slideStackStack.push(createGroupSlideStack(newSlides));
+    };
+
+    this.showPrevSlide = function () {
+        slideStackStack.peek().previous();
+    };
+
+    this.showNextSlide = function () {
+        slideStackStack.peek().next();
+    };
+
+    this.showMenu = function () {
+        slideStackStack.collapse();
+        slideStackStack.peek().show(readSlides.menuIndex);
+    };
+
+    this.reset = function () {
+        slideStackStack.collapse();
+        slideStackStack.peek().rewind();
+    };
+
+    return this;
+};
+
+
+Slidor.presentation.createSlideStackStack = function () {
+    var slideStackStack = [],
+        peek = function () {
+            return slideStackStack[slideStackStack.length-1];
+        },
+        pop = function () {
+            if (slideStackStack.length > 1) {
+                peek().hide();
+                slideStackStack.pop();
+                peek().show();
+                return true;
+            }
+            return false;
+        },
+        push = function (slideStack) {
+            slideStackStack.push(slideStack);
+            peek().next();
+        },
+        collapse = function () {
+            peek().end();
+            slideStackStack = [slideStackStack[0]];
+        };
+
+    return {
+        peek: peek,
+        pop: pop,
+        push: push,
+        collapse: collapse
+    }
+};
+
+
 Slidor.presentation.createSlideStack = function (options) {
     var slides = options.slides || [],
         showCallback = options.showCallback,
         endCallback = options.endCallback,
+        hideCallback = options.hideCallback,
         previousOfFirstCallback = options.previousOfFirstCallback,
 
         currentIndex = -1,
@@ -16,7 +143,20 @@ Slidor.presentation.createSlideStack = function (options) {
                 showCallback(slides[currentIndex]);
             }
         },
+        end = function () {
+            if (endCallback) {
+                endCallback();
+            }
+        },
+        hide = function () {
+            if (hideCallback) {
+                hideCallback();
+            }
+        },
         previous = function () {
+            if (slides.length === 0) {
+                return;
+            }
             for (var i = currentIndex - 1; i >= 0; i--) {
                 if (slides[i]) {
                     currentIndex = i;
@@ -39,134 +179,19 @@ Slidor.presentation.createSlideStack = function (options) {
                     return;
                 }
             }
-            if (endCallback) {
-                endCallback();
-            }
+            end();
         },
-        reset = function () {
+        rewind = function () {
             currentIndex = -1;
-            next();
         };
 
     return {
         show: show,
         next: next,
         previous: previous,
-        reset: reset
+        rewind: rewind,
+        end: end,
+        hide: hide
     };
 };
 
-Slidor.presentation.create = function (options) {
-    var autoStart = options.autoStart || false,
-        autoRewind = options.autoRewind || false,
-        hideFrames = options.hideFrames,
-
-        slidor,
-        presentation = this,
-        readSlides = [],
-        slideStackStack = [],
-
-        popSlideStack = function () {
-            if (slideStackStack.length > 1) {
-                slideStackStack.splice(0, 1);
-                slideStackStack[0].show();
-                return true;
-            }
-            return false;
-        },
-
-
-        createNormalSlideStack = function (slides) {
-            return Slidor.presentation.createSlideStack({
-                slides: slides,
-                showCallback: function (slide) {
-                    slidor.animateWithTransformation(slide);
-                },
-                previousOfFirstCallback: function () {
-                    popSlideStack();
-                },
-                endCallback: function () {
-                    if (!popSlideStack() && autoRewind) {
-                        slideStackStack[0].reset();
-                    }
-                },
-                previousOfFirstCallback: popSlideStack
-            });
-        },
-        createGroupSlideStack = function (slides) {
-            return Slidor.presentation.createSlideStack({
-                slides: slides,
-                showCallback: function (slide) {
-                    for (var key in slides) {
-                        if (slides[key] !== slide) {
-                            slides[key].$el.toggle(false);
-                        }
-                    }
-                    slide.$el.toggle(true);
-                    console.log(slide);
-                    slidor.animateWithTransformation(slide);
-                },
-                previousOfFirstCallback: function () {
-                    popSlideStack();
-                },
-                endCallback: function () {
-                    if (!popSlideStack() && autoRewind) {
-                        slideStackStack[0].reset();
-                    }
-                },
-                previousOfFirstCallback: popSlideStack
-            });
-        };
-
-    slidor = new Slidor({
-        el: options.el,
-        svgFilename: options.svgFilename,
-        mode: options.mode,
-        transitionDuration: options.transformDuration,
-        success: function (loadedSvg) {
-            readSlides = Slidor.svgUtil.readSlides({
-                svg: loadedSvg,
-                hideFrames: hideFrames,
-                gotoCallback: presentation.gotoSlide
-            });
-            slideStackStack = [createNormalSlideStack(readSlides.presentationRoot)];
-            if (autoStart) {
-                presentation.showNextSlide();
-            }
-        },
-        error: function () {
-            alert("Error loading svg file " + svgFilename);
-        }
-    });
-    
-    this.gotoSlide = function (target) {
-        var newSlides = readSlides.slideGroups[target], slideStack;
-        if (!newSlides) {
-            alert("Cloud not find slide group " + target);
-            return;
-        }
-        slideStack = createGroupSlideStack(newSlides);
-        slideStackStack.splice(0, 0, slideStack);
-        presentation.showNextSlide();
-    };
-
-    this.showPrevSlide = function () {
-        slideStackStack[0].previous();
-    };
-
-    this.showNextSlide = function () {
-        slideStackStack[0].next();
-    };
-
-    this.showMenu = function () {
-        slideStackStack = [slideStackStack[slideStackStack.length - 1]];
-        slideStackStack[0].show(readSlides.menuIndex);
-    };
-
-    this.reset = function () {
-        slideStackStack = [slideStackStack[slideStackStack.length - 1]];
-        slideStackStack[0].reset();
-    };
-
-    return this;
-}
