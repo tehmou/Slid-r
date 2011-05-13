@@ -17,20 +17,26 @@ Slidor.presentation.create = function (options) {
             });
         },
         createGroupSlideStack = function (slideGroup) {
+            var currentSlide;
+
             return Slidor.presentation.createSlideStack({
                 slides: slideGroup.slides,
                 showCallback: function (slide) {
-                    for (var key in slideGroup.slides) {
-                        if (slideGroup.slides[key] !== slide && !slideGroup.slides[key].$el.is(":visible")) {
-                            slideGroup.slides[key].$el.detach();
-                        }
-                    }
-                    slideGroup.$el.append(slide.$el);
-
-                    if (!slideGroup.$el.is(":visible")) {
-                        slideGroup.$el.toggle(true);
+                    var previousSlide = currentSlide;
+                    if (slideGroup.$el.children().length === 0) {
+                        slideGroup.$el.css("opacity", 1.0);
                         slidor.animateWithTransformation(slide);
                     }
+                    slide.$el.css("opacity", 0).animate({ opacity: 1.0 }, {
+                        duration: 300,
+                        complete: function () {
+                            if (previousSlide) {
+                                previousSlide.$el.detach();
+                            }
+                        }
+                    });
+                    slideGroup.$el.append(slide.$el);
+                    currentSlide = slide;
                 },
                 endCallback: function () {
                     slideStackStack.pop();
@@ -39,11 +45,14 @@ Slidor.presentation.create = function (options) {
                     slideStackStack.pop();
                 },
                 hideCallback: function () {
-                    for (var key in slideGroup.slides) {
-                        if (slideGroup.slides[key].$el.is(":visible")) {
-                            slideGroup.slides[key].$el.detach();
+                    slideGroup.$el.animate({ opacity: 0.0 }, {
+                        duration: 300,
+                        complete: function () {
+                            for (var key in slideGroup.slides) {
+                                slideGroup.slides[key].$el.detach();
+                            }
                         }
-                    }
+                    })
                 }
             });
         };
