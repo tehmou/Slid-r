@@ -22,12 +22,15 @@ Slidor.presentation.create = function (options) {
                 showCallback: function (slide) {
                     for (var key in slideGroup.slides) {
                         if (slideGroup.slides[key] !== slide && !slideGroup.slides[key].$el.is(":visible")) {
-                            slideGroup.slides[key].$el.fadeOut();
+                            slideGroup.slides[key].$el.detach();
                         }
                     }
                     slideGroup.$el.append(slide.$el);
-                    slide.$el.fadeIn();
-                    slidor.animateWithTransformation(slide);
+
+                    if (!slideGroup.$el.is(":visible")) {
+                        slideGroup.$el.toggle(true);
+                        slidor.animateWithTransformation(slide);
+                    }
                 },
                 endCallback: function () {
                     slideStackStack.pop();

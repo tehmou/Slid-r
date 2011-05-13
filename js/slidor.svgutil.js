@@ -90,6 +90,7 @@ Slidor.svgUtil = {};
                     $el: $value,
                     slides: []
                 };
+                $value.toggle(false);
                 $value.children().each(function (index, value) {
                     var slide = Slidor.svgUtil.createSlide(value, {});
                     slides.slideGroups[slideGroupId].slides.push(slide);
